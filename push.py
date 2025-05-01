@@ -1,3 +1,8 @@
+"""
+USAGE: in the terminal, make sure your in the root directory of the project and run the following command:
+python3 push.py "<insert commit message>"
+"""
+
 from subprocess import run, PIPE 
 import sys
 
