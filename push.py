@@ -9,9 +9,9 @@ import sys
 
 
 def main():
-    
     # Check for changes in the git repository
     result = run(["git", "status", "--porcelain"], stdin=PIPE, stderr=PIPE,  stdout=PIPE)
+    
     if not result.stdout.strip():
         print("No changes detected. Exiting program...")
         sys.exit(0)
