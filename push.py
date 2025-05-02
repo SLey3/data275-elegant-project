@@ -11,7 +11,7 @@ import sys
 def main():
     
     # Check for changes in the git repository
-    result = run(["git", "status", "--porcelain"], stdin=sys.stdin, stderr=sys.stderr,  stdout=PIPE)
+    result = run(["git", "status", "--porcelain"], stdin=PIPE, stderr=PIPE,  stdout=PIPE)
     if not result.stdout.strip():
         print("No changes detected. Exiting program...")
         sys.exit(0)
@@ -24,15 +24,15 @@ def main():
     
     print("adding project to git stage...")
     sleep(1)
-    run(["git", "add", "."], stdin=sys.stdin, stderr=sys.stderr, stdout=PIPE)
+    run(["git", "add", "."], stdin=PIPE, stderr=PIPE, stdout=PIPE)
     
     print("committing changes...")
     sleep(1)
-    run(["git", "commit", "-m", f'"{commit_msg}"'], stdin=sys.stdin, stderr=sys.stderr, stdout=PIPE)
+    run(["git", "commit", "-m", f'"{commit_msg}"'], stdin=PIPE, stderr=PIPE, stdout=PIPE)
     
     print("pushing changes. If any error pops up run 'git pull' else if you cant figure it out reach out for support!")
     sleep(1)
-    run(["git", "push"], stdin=sys.stdin, stderr=sys.stderr, stdout=PIPE)
+    run(["git", "push"], stdin=PIPE, stderr=PIPE, stdout=PIPE)
     
     print("Changes were pushed successfully! Exiting program...")
     sleep(1)
