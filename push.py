@@ -9,6 +9,13 @@ import sys
 
 
 def main():
+    
+    # Check for changes in the git repository
+    result = run(["git", "status", "--porcelain"], stdin=sys.stdin, stderr=sys.stderr,  stdout=PIPE)
+    if not result.stdout.strip():
+        print("No changes detected. Exiting program...")
+        sys.exit(0)
+    
     try:
         commit_msg: str = sys.argv[1]
     except IndexError:
