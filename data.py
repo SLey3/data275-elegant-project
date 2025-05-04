@@ -72,11 +72,9 @@ raw_gaia_df.dec = raw_gaia_df.dec.apply(deci2cartesian)
 raw_harris_ident_pos_df.dropna(inplace=True)
 raw_harris_metallicity_photometry_df.dropna(inplace=True)
 raw_harris_velocity_struct_params_df.dropna(inplace=True)
-raw_gaia_df.dropna(inplace=True)
-
 
 # ---- create exports ----
 harris_ident_pos_df = raw_harris_ident_pos_df.copy(True)
 harris_metallicity_photometry_df = raw_harris_metallicity_photometry_df.copy(True)
 harris_velocity_struct_params_df = raw_harris_velocity_struct_params_df.copy(True)
-gaia_df = raw_gaia_df.copy(True)
+gaia_df = raw_gaia_df[["solution_id", "designation", "ra", "dec", "parallax"]]
