@@ -42,19 +42,25 @@ raw_harris_ident_pos_df.rename(columns={"RA (2000)": "ra", "DEC": "dec"}, inplac
 
 # ---- conversion functions ----
 def dec2deci(dec: str) -> float:
-    deg, arc_m, arc_s = dec.split(" ")
-
-    return int(deg) + (int(arc_m) / 60) + (float(arc_s) / 3600)
+    dec_s = dec.split(" ")
+    is_neg = dec_s[0][0] == '-'
+    
+    deg, am, _as = float(dec_s[0]), float(dec_s[1]), float(dec_s[2])
+    
+    return round(-1 * (deg + am/60 + _as/3600), 4) if is_neg else round(deg + am/60 + _as/3600, 4)
 
 def ra2deci(ra: str) -> float:
     h, m, s = ra.split(" ")
     
     return (int(h) + (int(m) / 60) + (float(s) / 3600)) * 15
 
-def deci2cartesian(deci: float) -> tuple[float, int]:
-    x = np.cos(np.radians(deci))
-    y = np.sin(np.radians(deci))
-    z = 0
+def radec2cartesian(ra: float, dec: float) -> tuple[float]:
+    # x = D * cos(Dec) * cos(RA)
+    # y = D * cos(Dec) * sin(RA)
+    # z = D * sin(Dec)
+    x = np.cos(dec) * np.cos(ra)
+    y = np.cos(dec) * np.sin(ra)
+    z = np.sin(dec)
     return x, y, z
 
 # ---- NOTE: from inspection we note that only the harris_ident_pos_df RA and DEC values need to be converted to decimal ----
@@ -63,10 +69,15 @@ raw_harris_ident_pos_df.dec = raw_harris_ident_pos_df.dec.apply(dec2deci)
 
 
 # ---- apply decimal degrees 2 cartesian ----
-raw_harris_ident_pos_df.ra = raw_harris_ident_pos_df.ra.apply(deci2cartesian)
-raw_harris_ident_pos_df.dec = raw_harris_ident_pos_df.dec.apply(deci2cartesian)
-raw_gaia_df.ra = raw_gaia_df.ra.apply(deci2cartesian)
-raw_gaia_df.dec = raw_gaia_df.dec.apply(deci2cartesian)
+raw_harris_ident_pos_df["cartesian"] = raw_harris_ident_pos_df.apply(
+    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
+)
+raw_harris_ident_pos_df["cartesian"] = raw_harris_ident_pos_df.apply(
+    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
+)
+raw_gaia_df["cartesian"] = raw_gaia_df.apply(
+    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
+)
 
 # ---- drop na ----
 raw_harris_ident_pos_df.dropna(inplace=True)
@@ -77,4 +88,4 @@ raw_harris_velocity_struct_params_df.dropna(inplace=True)
 harris_ident_pos_df = raw_harris_ident_pos_df.copy(True)
 harris_metallicity_photometry_df = raw_harris_metallicity_photometry_df.copy(True)
 harris_velocity_struct_params_df = raw_harris_velocity_struct_params_df.copy(True)
-gaia_df = raw_gaia_df[["solution_id", "designation", "ra", "dec", "parallax"]]
+gaia_df = raw_gaia_df[["solution_id", "designation", "ra", "dec", "parallax", "cartesian"]]
