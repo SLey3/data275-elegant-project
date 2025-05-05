@@ -67,13 +67,15 @@ def radeg2deci(ra: str) -> float:
 def decdeg2deci(dec: str) -> float:
     return dec2deci(np.radians(float(dec)))
 
+
 def radec2cartesian(ra: float, dec: float, parallax: float) -> tuple[float]:
     # x = D * cos(Dec) * cos(RA)
     # y = D * cos(Dec) * sin(RA)
     # z = D * sin(Dec)
-    x = parallax * np.cos(dec) * np.cos(ra)
-    y = parallax * np.cos(dec) * np.sin(ra)
-    z = parallax * np.sin(dec)
+    # 1/parallax is Distance in parsecs
+    x = (1/(parallax/1000)) * np.cos(dec) * np.cos(ra)
+    y = (1/(parallax/1000)) * np.cos(dec) * np.sin(ra)
+    z = (1/(parallax/1000)) * np.sin(dec)
     return x, y, z
 
 # ---- NOTE: from inspection we note that only the harris_ident_pos_df RA and DEC values need to be converted to decimal ----
