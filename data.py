@@ -58,7 +58,7 @@ def ra2deci(ra: str | np.float64) -> float:
     
     h, m, s = ra.split(" ")
     
-    return (int(h) + (int(m) / 60) + (float(s) / 3600)) * 15
+    return round((int(h) + (int(m) / 60) + (float(s) / 3600)) * 15, 4)
 
 
 def radeg2deci(ra: str) -> float:
