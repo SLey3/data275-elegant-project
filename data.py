@@ -41,48 +41,58 @@ raw_gaia_df = pd.read_csv("./data/GaiaSource.csv")
 raw_harris_ident_pos_df.rename(columns={"RA (2000)": "ra", "DEC": "dec"}, inplace=True) # to match with gaiasource df
 
 # ---- conversion functions ----
-def dec2deci(dec: str) -> float:
+def dec2deci(dec: str | np.float64) -> float:
+    if isinstance(dec, np.float64):
+        return round(dec, 4)
+    
     dec_s = dec.split(" ")
     is_neg = dec_s[0][0] == '-'
     
     deg, am, _as = float(dec_s[0]), float(dec_s[1]), float(dec_s[2])
-    
+
     return round(-1 * (deg + am/60 + _as/3600), 4) if is_neg else round(deg + am/60 + _as/3600, 4)
 
-def ra2deci(ra: str) -> float:
+def ra2deci(ra: str | np.float64) -> float:
+    if isinstance(ra, np.float64):
+        return round(ra, 4)
+    
     h, m, s = ra.split(" ")
     
     return (int(h) + (int(m) / 60) + (float(s) / 3600)) * 15
 
-def radec2cartesian(ra: float, dec: float) -> tuple[float]:
+
+def radeg2deci(ra: str) -> float:
+    return ra2deci(np.radians(float(ra)))
+
+def decdeg2deci(dec: str) -> float:
+    return dec2deci(np.radians(float(dec)))
+
+def radec2cartesian(ra: float, dec: float, parallax: float) -> tuple[float]:
     # x = D * cos(Dec) * cos(RA)
     # y = D * cos(Dec) * sin(RA)
     # z = D * sin(Dec)
-    x = np.cos(dec) * np.cos(ra)
-    y = np.cos(dec) * np.sin(ra)
-    z = np.sin(dec)
+    x = parallax * np.cos(dec) * np.cos(ra)
+    y = parallax * np.cos(dec) * np.sin(ra)
+    z = parallax * np.sin(dec)
     return x, y, z
 
 # ---- NOTE: from inspection we note that only the harris_ident_pos_df RA and DEC values need to be converted to decimal ----
 raw_harris_ident_pos_df.ra = raw_harris_ident_pos_df.ra.apply(ra2deci)
 raw_harris_ident_pos_df.dec = raw_harris_ident_pos_df.dec.apply(dec2deci)
+raw_gaia_df.ra = raw_gaia_df.ra.apply(radeg2deci)
+raw_gaia_df.dec = raw_gaia_df.dec.apply(decdeg2deci)
 
 
-# ---- apply decimal degrees 2 cartesian ----
-raw_harris_ident_pos_df["cartesian"] = raw_harris_ident_pos_df.apply(
-    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
-)
-raw_harris_ident_pos_df["cartesian"] = raw_harris_ident_pos_df.apply(
-    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
-)
+# ---- apply cartesian to gaia ----
 raw_gaia_df["cartesian"] = raw_gaia_df.apply(
-    lambda row: radec2cartesian(row["ra"], row["dec"]), axis=1
+    lambda row: radec2cartesian(row["ra"], row["dec"], row["parallax"]), axis=1
 )
 
 # ---- drop na ----
-raw_harris_ident_pos_df.dropna(inplace=True)
-raw_harris_metallicity_photometry_df.dropna(inplace=True)
-raw_harris_velocity_struct_params_df.dropna(inplace=True)
+raw_harris_ident_pos_df.dropna(inplace=True, subset=["ra", "dec"])
+raw_harris_metallicity_photometry_df.dropna(inplace=True, subset=["ra", "dec"])
+raw_harris_velocity_struct_params_df.dropna(inplace=True, subset=["ra", "dec"])
+raw_gaia_df.dropna(inplace=True, subset=["ra", "dec"])
 
 # ---- create exports ----
 harris_ident_pos_df = raw_harris_ident_pos_df.copy(True)
