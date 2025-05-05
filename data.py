@@ -90,8 +90,8 @@ raw_gaia_df["cartesian"] = raw_gaia_df.apply(
 
 # ---- drop na ----
 raw_harris_ident_pos_df.dropna(inplace=True, subset=["ra", "dec"])
-raw_harris_metallicity_photometry_df.dropna(inplace=True, subset=["ra", "dec"])
-raw_harris_velocity_struct_params_df.dropna(inplace=True, subset=["ra", "dec"])
+raw_harris_metallicity_photometry_df.dropna(inplace=True)
+raw_harris_velocity_struct_params_df.dropna(inplace=True)
 raw_gaia_df.dropna(inplace=True, subset=["ra", "dec"])
 
 # ---- create exports ----
